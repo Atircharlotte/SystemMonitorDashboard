@@ -51,5 +51,4 @@ func GetMemory() MemState {
 	}
 
 	return stats
-
 }
