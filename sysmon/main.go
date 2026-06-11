@@ -19,4 +19,19 @@ func main() {
 	fmt.Printf("Total Memory: %dMB\n", totalMB)
 	fmt.Printf("Available Memory: %dMB\n", availableMB)
 	fmt.Printf("Used Memory: %dMB\n", usedMB)
+
+
+
+	fmt.Println("Calculating CPU Usage...")
+	// get the pipe
+	cpuStream := monitor.StartCPUWorker()
+
+	fmt.Println("Waiting for CPU data...")
+
+	// listen to pipe forever
+	for {
+		currentCPU := <-cpuStream
+		fmt.Printf("Current CPU Usage: %.2f%%\n", currentCPU)
+	}
+
 }
