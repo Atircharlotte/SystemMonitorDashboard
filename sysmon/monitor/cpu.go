@@ -9,45 +9,53 @@ import (
 	"strings"
 	"time"
 )
-type CPUUnit struct {
-	usedUnits int
-	idleUnits int
+
+// type CPUUnit struct {
+// 	usedUnits int
+// 	idleUnits int
+// }
+
+// Renamed to Snapshot because it represents a single moment in time
+type CPUSnapshot struct {
+	Total int
+	Idle  int
 }
 
-func ReadCPUUnit() CPUUnit {
+func ReadCPUSnapshot() CPUSnapshot {
 	
 	file, err := os.Open("/proc/stat")
 	if err != nil {
 		log.Fatal("Failed to open file: ", err)
 	}
-	var AllCPUUnits CPUUnit;
+	defer file.Close() // CRITICAL: This prevents the memory/file leak!
+
+	// var AllCPUUnits CPUUnit;
+	var snapshot CPUSnapshot
 	scanner := bufio.NewScanner(file)
+
 	for scanner.Scan() {
 		line := scanner.Text()
-
 		// split the line into words
 		fields := strings.Fields(line)
 
-		if fields[0] == "cpu" {
-			usedUnits := 0
-			idleUnits := 0
-			for j := 1; j < 11; j++ {
-				if j != 5 {
-					unitToAdd, _ := strconv.Atoi(fields[j])
-					usedUnits += unitToAdd
-				} else {
-					idleUnit, _ := strconv.Atoi(fields[j])
-					idleUnits += idleUnit
+		if len(fields) > 0 && fields[0] == "cpu" {
+			total := 0
+			idle := 0
+
+			// loop through all 10 time columns
+			for j := 1; j < len(fields); j++ {
+				val, _ := strconv.Atoi(fields[j])
+				total += val
+				if j == 4 || j == 5 {
+					idle += val
 				}
-				AllCPUUnits.usedUnits = usedUnits
-				AllCPUUnits.idleUnits = idleUnits
 			}
-			break
+			snapshot.Total = total
+			snapshot.Idle = idle
+			break // only care about the first "cpu" line
 		}
 	}
-	fmt.Printf("usedUnit: %d\n", AllCPUUnits.usedUnits);
-	fmt.Printf("idleUnit: %d\n", AllCPUUnits.idleUnits);
-	return AllCPUUnits
+	return snapshot
 }
 
 
@@ -60,20 +68,20 @@ func StartCPUWorker() <- chan float64 {
 	go func() {
 		for {
 			// TODO: read /proc/stat (snapshot 1)
-			unitRecordBefore := ReadCPUUnit()
+			snap1 := ReadCPUSnapshot()
 			
 			// wait for 1 second
 			time.Sleep(1 * time.Second)
 			// TODO: read /proc/stat (snapshot 2)
-			unitRecordAfter := ReadCPUUnit()
+			snap2 := ReadCPUSnapshot()
 
-			totalDelta := unitRecordAfter.usedUnits - unitRecordBefore.usedUnits
-			idleDelta := unitRecordAfter.idleUnits - unitRecordBefore.idleUnits
+			totalDelta := snap2.Total - snap1.Total
+			idleDelta := snap2.Idle - snap1.Idle
 
 			fmt.Printf("totalDelta: %d\n", totalDelta);
 			fmt.Printf("idleDelta: %d\n", idleDelta);
 			// calculate 
-			calculatedPercentage := (float64(totalDelta - idleDelta) / float64(totalDelta)) * 100 
+			calculatedPercentage := (float64(totalDelta - idleDelta) / float64(totalDelta)) * 100.0 
 
 			// send the result down the pipe
 			cpuChannel <- calculatedPercentage
