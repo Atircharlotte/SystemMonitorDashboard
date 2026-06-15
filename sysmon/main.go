@@ -34,4 +34,12 @@ func main() {
 		fmt.Printf("Current CPU Usage: %.2f%%\n", currentCPU)
 	}
 
+	fmt.Println("Calculating network speed...")
+	networkStream := monitor.StartNetworkWorker()
+	for {
+		currentNetworkSpeed := <- networkStream
+		fmt.Printf("Current Network RxSpeed speed: %.2f KB/s\n", currentNetworkSpeed.RxSpeedKB)
+		fmt.Printf("Current Network TxSpeed speed: %.2f KB/s\n", currentNetworkSpeed.TxSpeedKB)
+	}
+
 }
