@@ -38,8 +38,8 @@ func main() {
 	networkStream := monitor.StartNetworkWorker()
 	for {
 		currentNetworkSpeed := <- networkStream
-		fmt.Printf("Current Network RxSpeed speend: %.2fKB/s\n ", currentNetworkSpeed.RxSpeedMB)
-		fmt.Printf("Current Network TxSpeed speend: %.2fKB/s\n ", currentNetworkSpeed.TxSpeedMB)
+		fmt.Printf("Current Network RxSpeed speed: %.2f KB/s\n", currentNetworkSpeed.RxSpeedKB)
+		fmt.Printf("Current Network TxSpeed speed: %.2f KB/s\n", currentNetworkSpeed.TxSpeedKB)
 	}
 
 }
