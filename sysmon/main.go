@@ -42,4 +42,12 @@ func main() {
 		fmt.Printf("Current Network TxSpeed speed: %.2f KB/s\n", currentNetworkSpeed.TxSpeedKB)
 	}
 
+	fmt.Println("Calculating disk soeed...")
+	diskStream := monitor.StartDiskWorker()
+	for {
+		currentDiskSpeed := <- diskStream
+		fmt.Printf("Current Disk Reading speed: %.2f KB/s\n", currentDiskSpeed.ReadSpeedKB)
+		fmt.Printf("Current Disk Writing speed: %.2f KB/s\n", currentDiskSpeed.WriteSpeedKB)
+	}
+
 }
