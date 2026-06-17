@@ -22,25 +22,25 @@ func main() {
 
 
 
-	fmt.Println("Calculating CPU Usage...")
-	// get the pipe
-	cpuStream := monitor.StartCPUWorker()
+	// fmt.Println("Calculating CPU Usage...")
+	// // get the pipe
+	// cpuStream := monitor.StartCPUWorker()
 
-	fmt.Println("Waiting for CPU data...")
+	// fmt.Println("Waiting for CPU data...")
 
-	// listen to pipe forever
-	for {
-		currentCPU := <-cpuStream
-		fmt.Printf("Current CPU Usage: %.2f%%\n", currentCPU)
-	}
+	// // listen to pipe forever
+	// for {
+	// 	currentCPU := <-cpuStream
+	// 	fmt.Printf("Current CPU Usage: %.2f%%\n", currentCPU)
+	// }
 
-	fmt.Println("Calculating network speed...")
-	networkStream := monitor.StartNetworkWorker()
-	for {
-		currentNetworkSpeed := <- networkStream
-		fmt.Printf("Current Network RxSpeed speed: %.2f KB/s\n", currentNetworkSpeed.RxSpeedKB)
-		fmt.Printf("Current Network TxSpeed speed: %.2f KB/s\n", currentNetworkSpeed.TxSpeedKB)
-	}
+	// fmt.Println("Calculating network speed...")
+	// networkStream := monitor.StartNetworkWorker()
+	// for {
+	// 	currentNetworkSpeed := <- networkStream
+	// 	fmt.Printf("Current Network RxSpeed speed: %.2f KB/s\n", currentNetworkSpeed.RxSpeedKB)
+	// 	fmt.Printf("Current Network TxSpeed speed: %.2f KB/s\n", currentNetworkSpeed.TxSpeedKB)
+	// }
 
 	fmt.Println("Calculating disk soeed...")
 	diskStream := monitor.StartDiskWorker()
