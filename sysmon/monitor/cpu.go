@@ -2,7 +2,6 @@ package monitor
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -78,8 +77,6 @@ func StartCPUWorker() <- chan float64 {
 			totalDelta := snap2.Total - snap1.Total
 			idleDelta := snap2.Idle - snap1.Idle
 
-			fmt.Printf("totalDelta: %d\n", totalDelta);
-			fmt.Printf("idleDelta: %d\n", idleDelta);
 			// calculate 
 			calculatedPercentage := (float64(totalDelta - idleDelta) / float64(totalDelta)) * 100.0 
 

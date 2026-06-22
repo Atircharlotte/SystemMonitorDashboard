@@ -2,52 +2,30 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"sysmon/monitor"
+	"sysmon/ui"
+
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 func main() {
-	fmt.Println("Starting System Monitor... ")
-
-	// fetched structured data
-	memData := monitor.GetMemory()
 	
-	// The OS gives us kilobytes. Convert to megabytes
-	totalMB := memData.Total / 1024
-	availableMB := memData.Available / 1024
-	usedMB := totalMB - availableMB
-
-	fmt.Printf("Total Memory: %dMB\n", totalMB)
-	fmt.Printf("Available Memory: %dMB\n", availableMB)
-	fmt.Printf("Used Memory: %dMB\n", usedMB)
-
-
-
-	fmt.Println("Calculating CPU Usage...")
-	// get the pipe
+	// 1. Start he background OS Workers
 	cpuStream := monitor.StartCPUWorker()
-
-	fmt.Println("Waiting for CPU data...")
-
-	// listen to pipe forever
-	for {
-		currentCPU := <-cpuStream
-		fmt.Printf("Current CPU Usage: %.2f%%\n", currentCPU)
-	}
-
-	fmt.Println("Calculating network speed...")
 	networkStream := monitor.StartNetworkWorker()
-	for {
-		currentNetworkSpeed := <- networkStream
-		fmt.Printf("Current Network RxSpeed speed: %.2f KB/s\n", currentNetworkSpeed.RxSpeedKB)
-		fmt.Printf("Current Network TxSpeed speed: %.2f KB/s\n", currentNetworkSpeed.TxSpeedKB)
-	}
-
-	fmt.Println("Calculating disk soeed...")
 	diskStream := monitor.StartDiskWorker()
-	for {
-		currentDiskSpeed := <- diskStream
-		fmt.Printf("Current Disk Reading speed: %.2f KB/s\n", currentDiskSpeed.ReadSpeedKB)
-		fmt.Printf("Current Disk Writing speed: %.2f KB/s\n", currentDiskSpeed.WriteSpeedKB)
+
+
+	// 2. Initialize the dashboard with the stream
+	dashboard := ui.InitialModel(cpuStream, networkStream, diskStream)
+
+	// 3. Start the bubble tea program
+	p := tea.NewProgram(dashboard)
+
+	if _, err := p.Run(); err != nil {
+		fmt.Printf("Alas, there's been an error: %v", err)
+		os.Exit(1)
 	}
 
 }
